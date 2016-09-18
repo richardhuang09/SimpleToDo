@@ -35,11 +35,16 @@ Here's a walkthrough of implemented user stories:
 
 ![](http://i.imgur.com/BU02Ja3.gif)
 
-2. Removing and editing list items.
+2. Removing list items.
 
-![](http://i.imgur.com/7pFRNNu.gif)
+![](http://i.imgur.com/gaziHi3.gif)
 
-3. Persistence.  Emulator is stopped and re-run.
+3. Editing list items.
+
+![](http://i.imgur.com/ft7f68E.gif)
+
+
+4. Persistence.  Emulator is stopped and re-run.
 
 ![](http://i.imgur.com/VIswexF.gif)
 
