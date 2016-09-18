@@ -31,7 +31,14 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<video src='https://goo.gl/photos/cRdxQMP1qAwMgkEA6'/>
+1. Adding list items.
+![](http://i.imgur.com/BU02Ja3.gif)
+
+2. Removing and editing list items.
+![](http://i.imgur.com/7pFRNNu.gif)
+
+3. Persistence.  Emulator is stopped and re-run.
+![](http://i.imgur.com/VIswexF.gif)
 
 
 ## Notes
