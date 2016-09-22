@@ -9,16 +9,18 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import org.apache.commons.io.FileUtils;
+import com.activeandroid.ActiveAndroid;
+import com.activeandroid.Configuration;
+import com.activeandroid.query.Delete;
+import com.activeandroid.query.Select;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    ArrayList<String> todoItems;
-    ArrayAdapter<String> aToDoAdapter;
+    ArrayList<Item> todoItems;
+    ArrayAdapter<Item> aToDoAdapter;
     ListView lvItems;
     EditText etEditText;
     final int REQUEST_CODE = 20;
@@ -26,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Configuration.Builder config = new Configuration.Builder(this);
+        config.addModelClasses(Item.class);
+        ActiveAndroid.initialize(config.create());
         setContentView(R.layout.activity_main);
         populateArrayItems();
         lvItems = (ListView) findViewById(R.id.lvItems);
@@ -34,9 +39,11 @@ public class MainActivity extends AppCompatActivity {
         lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                String toFind = todoItems.get(position).toString();
                 todoItems.remove(position);
+                new Delete().from(Item.class).where("body = ?", toFind).execute();
                 aToDoAdapter.notifyDataSetChanged();
-                writeItems();
+                //writeItems();
                 return true;
             }
         });
@@ -58,41 +65,65 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
             String newText = data.getExtras().getString("newText");
+            String text = data.getExtras().getString("text");
             int position = data.getExtras().getInt("position", 0);
-            todoItems.set(position, newText);
+            List<Item> result = new Select().from(Item.class).where("Body = ?", text).execute();
+//            String output = "";
+//            for (Item item : result)
+//            {
+//                output += item.body + ",";
+//            }
+//            Log.d("TABLE", output);
+            Item toUpdate = result.get(0);
+            toUpdate.body = newText;
+            toUpdate.save();
+            todoItems.set(position, toUpdate);
             aToDoAdapter.notifyDataSetChanged();
-            writeItems();
+            //writeItems();
         }
     }
 
     public void populateArrayItems() {
         readItems();
-        aToDoAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, todoItems);
+        aToDoAdapter = new ArrayAdapter<Item>(this, android.R.layout.simple_list_item_1, todoItems);
     }
 
     public void onAddItem(View view) {
-        aToDoAdapter.add(etEditText.getText().toString());
+        Item toAdd = new Item(etEditText.getText().toString());
+        toAdd.save();
+        aToDoAdapter.add(toAdd);
         etEditText.setText("");
-        writeItems();
+        //writeItems();
     }
 
     private void readItems() {
-        File filesDir = getFilesDir();
-        File file = new File(filesDir, "todo.txt");
-        try {
-            todoItems = new ArrayList<String>(FileUtils.readLines(file));
-        } catch (IOException e) {
-            todoItems = new ArrayList<String>();
+        todoItems = new ArrayList<Item>();
+        List<Item> queryResults = new Select()
+                .from(Item.class)
+                .execute();
+        for (Item item : queryResults) {
+            todoItems.add(item);
         }
     }
 
-    private void writeItems() {
-        File filesDir = getFilesDir();
-        File file = new File(filesDir, "todo.txt");
-        try {
-            FileUtils.writeLines(file, todoItems);
-        } catch (IOException e) {
+//    private void readItems() {
+//        File filesDir = getFilesDir();
+//        File file = new File(filesDir, "todo.txt");
+//        try {
+//            todoItems = new ArrayList<String>(FileUtils.readLines(file));
+//        } catch (IOException e) {
+//            todoItems = new ArrayList<String>();
+//        }
+//    }
 
-        }
-    }
+
+//    private void writeItems() {
+//        File filesDir = getFilesDir();
+//        File file = new File(filesDir, "todo.txt");
+//        try {
+//            FileUtils.writeLines(file, todoItems);
+//        } catch (IOException e) {
+//
+//        }
+//    }
 }
